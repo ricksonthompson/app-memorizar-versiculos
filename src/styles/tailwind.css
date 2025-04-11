@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+    font-family: 'Fira Sans', sans-serif;
+    background-color: hsl(190, 13%, 9%);
+    color: #1e1e1e;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #0A9B71;
+}
+
+button {
+    background-color: #0A9B71;
+    color: #232121;
+}
+
+.custom-verse {
+    border-left: 4px solid #9F2B29;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
