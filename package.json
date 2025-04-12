@@ -13,7 +13,6 @@
     "autoprefixer": "^10.4.2",
     "postcss": "^8.4.5",
     "react": "^19.1.0",
-    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.5.0",
     "react-scripts": "5.0.0",
@@ -25,7 +24,7 @@
     "@types/react-dom": "^19.1.2",
     "@types/react-router-dom": "^5.3.3"
   },
-  "homepage": ".",
+  "homepage": "./",
   "license": "MIT",
   "browserslist": {
     "production": [
