@@ -16,9 +16,9 @@ const App: React.FC = () => {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/meus-versiculos" element={<MyVerses />} />
+            {/* <Route path="/meus-versiculos" element={<MyVerses />} /> */}
             <Route path="/listas-personalizadas" element={<CustomLists />} />
-            <Route path="/recitar-versiculos" element={<ReciteVerses />} />
+            {/* <Route path="/recitar-versiculos" element={<ReciteVerses />} /> */}
           </Routes>
         </main>
         <Footer />

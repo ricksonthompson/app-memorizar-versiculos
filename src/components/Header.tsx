@@ -8,16 +8,16 @@ const Header: React.FC = () => {
                 {/* Logo e Título */}
                 <div className="flex items-center space-x-4">
                     <img
-                        src="https://cdn-icons-png.flaticon.com/512/2219/2219225.png"
+                        src="https://www.freeiconspng.com/thumbs/bible-icon/bible-icon-6.png"
                         alt="Logo"
                         className="w-10 h-10"
                     />
-                    <h1 className="text-2xl font-bold">Memorização de Versículos</h1>
+                    <h1 className="text-2xl font-bold">App de Memorização</h1>
                 </div>
 
                 {/* Navegação */}
-                <nav>
-                    <ul className="flex space-x-4">
+                {/* <nav>
+                    <ul className="flex space-x-4"> */}
                         {/* <li>
                             <Link
                                 to="/"
@@ -26,32 +26,32 @@ const Header: React.FC = () => {
                                 Home
                             </Link>
                         </li> */}
-                        <li>
+                        {/* <li>
                             <Link
                                 to="/meus-versiculos"
                                 className="bg-accent text-[#0A9B71] px-4 py-2 rounded hover:bg-[#0A9B71] hover:text-white transition"
                             >
                                 Meus Versículos
                             </Link>
-                        </li>
-                        <li>
+                        </li> */}
+                        {/* <li>
                             <Link
                                 to="/listas-personalizadas"
                                 className="bg-accent text-[#0A9B71] px-4 py-2 rounded hover:bg-[#0A9B71] hover:text-white transition"
                             >
                                 Listas Personalizadas
                             </Link>
-                        </li>
-                        <li>
+                        </li> */}
+                        {/* <li>
                             <Link
                                 to="/recitar-versiculos"
                                 className="bg-accent text-[#0A9B71] px-4 py-2 rounded hover:bg-[#0A9B71] hover:text-white transition"
                             >
                                 Recitar Versículos
                             </Link>
-                        </li>
-                    </ul>
-                </nav>
+                        </li> */}
+                    {/* </ul>
+                </nav> */}
             </div>
         </header>
     );
