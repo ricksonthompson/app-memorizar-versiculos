@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { saveCustomList, getCustomLists } from "../utils/localStorageHelper";
 import VerseList from "../components/VerseList";
+import { saveCustomList, getCustomLists } from "../utils/localStorageHelper";
 import { CustomList, Verse } from "../types";
 
 const CustomLists: React.FC = () => {
   const [customLists, setCustomLists] = useState<CustomList[]>(
     getCustomLists()
   );
+  const [expandedLists, setExpandedLists] = useState<string[]>([]);
   const [newListName, setNewListName] = useState("");
   const [isCreatingNewList, setIsCreatingNewList] = useState(false);
   const [manualInputsVisible, setManualInputsVisible] = useState<string | null>(
@@ -21,6 +22,14 @@ const CustomLists: React.FC = () => {
     version: "NTLH",
   });
   const [importedVerse, setImportedVerse] = useState("");
+
+  const toggleExpandList = (listId: string) => {
+    setExpandedLists((prev) =>
+      prev.includes(listId)
+        ? prev.filter((id) => id !== listId)
+        : [...prev, listId]
+    );
+  };
 
   // Função para salvar uma nova lista personalizada
   const handleSaveList = () => {
@@ -134,14 +143,36 @@ const CustomLists: React.FC = () => {
     }
   };
 
+  const handleDeleteList = (listId: string) => {
+    const updatedLists = customLists.filter((list) => list.id !== listId);
+    saveCustomList(updatedLists); // Atualiza o localStorage
+    setCustomLists(updatedLists); // Atualiza o estado
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Listas Personalizadas</h1>
-      <p className="text-gray-700 mb-4">
-        Uma lista personalizada é um bloco de versículos para facilitar a
-        memorização.
-        <br /> Exemplo: Salmos 119:1-10, Salmos 119:11-20.
-      </p>
+      <div className="flex items-center border border-blue-500 rounded p-4 mb-4 bg-transparent">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-blue-500 mr-2"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
+          />
+        </svg>
+        <p className="text-gray-700">
+          Uma lista personalizada é um bloco de versículos para facilitar a
+          memorização.
+          <br /> Exemplo: Salmos 119:1-10, Salmos 119:11-20.
+        </p>
+      </div>
 
       {/* Botão para criar nova lista */}
       {!isCreatingNewList && (
@@ -183,126 +214,192 @@ const CustomLists: React.FC = () => {
                 key={list.id}
                 className="p-4 border rounded shadow-sm bg-white"
               >
-                <h3 className="text-lg font-bold mb-2">{list.name}</h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-bold">{list.name}</h3>
+                  <div className="flex items-center space-x-2">
+                    {/* Botão de expandir/recolher */}
+                    <button
+                      onClick={() => toggleExpandList(list.id)}
+                      className="text-white hover:text-gray-700"
+                    >
+                      {expandedLists.includes(list.id) ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 15l7-7 7 7"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      )}
+                    </button>
 
-                {/* Botões para adicionar versículos */}
-                <div className="flex space-x-4 mb-4">
-                  <button
-                    onClick={() =>
-                      setManualInputsVisible(
-                        manualInputsVisible === list.id ? null : list.id
-                      )
-                    }
-                    className="bg-indigo-500 text-white p-2 rounded hover:bg-indigo-600"
-                  >
-                    Inserir +
-                  </button>
-                  <button
-                    onClick={() =>
-                      setImportInputsVisible(
-                        importInputsVisible === list.id ? null : list.id
-                      )
-                    }
-                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex"
-                  >
-                    <img
-                      src="https://www.bible.com/assets/icons/bible/200/en.png"
-                      alt="Bible App"
-                      className="w-6 h-6"
-                    />
-                    <span>Importar</span>
-                  </button>
+                    {/* Botão de excluir lista */}
+                    <button
+                      onClick={() => handleDeleteList(list.id)}
+                      className="text-white hover:text-gray-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Inputs para adicionar versículo manualmente */}
-                {manualInputsVisible === list.id && (
-                  <div className="mb-4">
-                    <input
-                      type="text"
-                      placeholder="Texto do Versículo"
-                      value={newVerse.text}
-                      onChange={(e) =>
-                        setNewVerse((prev) => ({
-                          ...prev,
-                          text: e.target.value,
-                        }))
-                      }
-                      className="border p-2 w-full mb-2"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Referência (Ex.: João 3:16)"
-                      value={newVerse.reference}
-                      onChange={(e) =>
-                        setNewVerse((prev) => ({
-                          ...prev,
-                          reference: e.target.value,
-                        }))
-                      }
-                      className="border p-2 w-full mb-2"
-                    />
-                    <select
-                      value={newVerse.version}
-                      onChange={(e) =>
-                        setNewVerse((prev) => ({
-                          ...prev,
-                          version: e.target.value,
-                        }))
-                      }
-                      className="border p-2 w-full mb-2"
-                    >
-                      <option value="NTLH">NTLH</option>
-                      <option value="ARA">ARA</option>
-                      <option value="NVI">NVI</option>
-                      <option value="NVT">NVT</option>
-                      <option value="ARC">ARC</option>
-                    </select>
-                    <button
-                      onClick={() => handleAddVerseToList(list.id)}
-                      className="bg-green-500 text-white p-2 rounded"
-                    >
-                      Salvar Versículo
-                    </button>
-                  </div>
-                )}
+                {expandedLists.includes(list.id) && (
+                  <>
+                    {/* Botões para adicionar versículos */}
+                    <div className="flex space-x-4 mb-4">
+                      <button
+                        onClick={() =>
+                          setManualInputsVisible(
+                            manualInputsVisible === list.id ? null : list.id
+                          )
+                        }
+                        className="bg-indigo-500 text-white p-2 rounded hover:bg-indigo-600"
+                      >
+                        Inserir +
+                      </button>
+                      <button
+                        onClick={() =>
+                          setImportInputsVisible(
+                            importInputsVisible === list.id ? null : list.id
+                          )
+                        }
+                        className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex"
+                      >
+                        <img
+                          src="https://www.bible.com/assets/icons/bible/200/en.png"
+                          alt="Bible App"
+                          className="w-6 h-6"
+                        />
+                        <span>Importar</span>
+                      </button>
+                    </div>
 
-                {/* Inputs para importar versículo */}
-                {importInputsVisible === list.id && (
-                  <div className="mb-4">
-                    <textarea
-                      placeholder="Cole aqui o versículo copiado do App da Bible"
-                      value={importedVerse}
-                      onChange={(e) => setImportedVerse(e.target.value)}
-                      className="border p-2 w-full h-24 mb-2"
-                    />
-                    <button
-                      onClick={() =>
-                        handleImportVerseToList(list.id, list.name)
-                      }
-                      className="bg-blue-500 text-white p-2 rounded"
-                    >
-                      Importar Versículo
-                    </button>
-                  </div>
-                )}
-
-                <VerseList
-                  verses={list.verses}
-                  setVerses={(updatedVerses) => {
-                    const updatedLists = customLists.map((l) =>
-                      l.id === list.id
-                        ? {
-                            ...l,
-                            verses: Array.isArray(updatedVerses)
-                              ? updatedVerses
-                              : updatedVerses([]), // Garante que updatedVerses seja um array
+                    {/* Inputs para adicionar versículo manualmente */}
+                    {manualInputsVisible === list.id && (
+                      <div className="mb-4">
+                        <input
+                          type="text"
+                          placeholder="Texto do Versículo"
+                          value={newVerse.text}
+                          onChange={(e) =>
+                            setNewVerse((prev) => ({
+                              ...prev,
+                              text: e.target.value,
+                            }))
                           }
-                        : l
-                    );
-                    saveCustomList(updatedLists);
-                    setCustomLists(updatedLists);
-                  }}
-                />
+                          className="border p-2 w-full mb-2"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Referência (Ex.: João 3:16)"
+                          value={newVerse.reference}
+                          onChange={(e) =>
+                            setNewVerse((prev) => ({
+                              ...prev,
+                              reference: e.target.value,
+                            }))
+                          }
+                          className="border p-2 w-full mb-2"
+                        />
+                        <select
+                          value={newVerse.version}
+                          onChange={(e) =>
+                            setNewVerse((prev) => ({
+                              ...prev,
+                              version: e.target.value,
+                            }))
+                          }
+                          className="border p-2 w-full mb-2"
+                        >
+                          <option value="NTLH">NTLH</option>
+                          <option value="ARA">ARA</option>
+                          <option value="NVI">NVI</option>
+                          <option value="NVT">NVT</option>
+                          <option value="ARC">ARC</option>
+                        </select>
+                        <button
+                          onClick={() => handleAddVerseToList(list.id)}
+                          className="bg-green-500 text-white p-2 rounded"
+                        >
+                          Salvar Versículo
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Inputs para importar versículo */}
+                    {importInputsVisible === list.id && (
+                      <div className="mb-4">
+                        <textarea
+                          placeholder="Cole aqui o versículo copiado do App da Bible"
+                          value={importedVerse}
+                          onChange={(e) => setImportedVerse(e.target.value)}
+                          className="border p-2 w-full h-24 mb-2"
+                        />
+                        <button
+                          onClick={() =>
+                            handleImportVerseToList(list.id, list.name)
+                          }
+                          className="bg-blue-500 text-white p-2 rounded"
+                        >
+                          Importar Versículo
+                        </button>
+                      </div>
+                    )}
+
+                    <VerseList
+                      verses={list.verses}
+                      setVerses={(updatedVerses) => {
+                        const updatedLists = customLists.map((l) =>
+                          l.id === list.id
+                            ? {
+                                ...l,
+                                verses: Array.isArray(updatedVerses)
+                                  ? updatedVerses
+                                  : updatedVerses([]), // Garante que updatedVerses seja um array
+                              }
+                            : l
+                        );
+                        saveCustomList(updatedLists);
+                        setCustomLists(updatedLists);
+                      }}
+                    />
+                  </>
+                )}
               </li>
             ))}
           </ul>
