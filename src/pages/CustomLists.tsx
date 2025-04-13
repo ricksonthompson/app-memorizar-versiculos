@@ -4,18 +4,14 @@ import { saveCustomList, getCustomLists } from "../utils/localStorageHelper";
 import { CustomList, Verse } from "../types";
 
 const CustomLists: React.FC = () => {
-  const [customLists, setCustomLists] = useState<CustomList[]>(
-    getCustomLists()
-  );
+  const [customLists, setCustomLists] = useState<CustomList[]>(getCustomLists());
   const [expandedLists, setExpandedLists] = useState<string[]>([]);
+  const [editableTotals, setEditableTotals] = useState<{ [key: string]: number }>({});
+  const [editingListId, setEditingListId] = useState<string | null>(null); // Estado para rastrear a lista em edição
   const [newListName, setNewListName] = useState("");
   const [isCreatingNewList, setIsCreatingNewList] = useState(false);
-  const [manualInputsVisible, setManualInputsVisible] = useState<string | null>(
-    null
-  );
-  const [importInputsVisible, setImportInputsVisible] = useState<string | null>(
-    null
-  );
+  const [manualInputsVisible, setManualInputsVisible] = useState<string | null>(null);
+  const [importInputsVisible, setImportInputsVisible] = useState<string | null>(null);
   const [newVerse, setNewVerse] = useState({
     text: "",
     reference: "",
@@ -25,10 +21,15 @@ const CustomLists: React.FC = () => {
 
   const toggleExpandList = (listId: string) => {
     setExpandedLists((prev) =>
-      prev.includes(listId)
-        ? prev.filter((id) => id !== listId)
-        : [...prev, listId]
+      prev.includes(listId) ? prev.filter((id) => id !== listId) : [...prev, listId]
     );
+  };
+
+  const handleTotalChange = (listId: string, newTotal: number) => {
+    setEditableTotals((prev) => ({
+      ...prev,
+      [listId]: newTotal,
+    }));
   };
 
   // Função para salvar uma nova lista personalizada
@@ -149,6 +150,15 @@ const CustomLists: React.FC = () => {
     setCustomLists(updatedLists); // Atualiza o estado
   };
 
+  const handleEditListName = (listId: string, newName: string) => {
+    const updatedLists = customLists.map((list) =>
+      list.id === listId ? { ...list, name: newName } : list
+    );
+    saveCustomList(updatedLists);
+    setCustomLists(updatedLists);
+    setEditingListId(null); // Sai do modo de edição
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Listas Personalizadas</h1>
@@ -209,35 +219,89 @@ const CustomLists: React.FC = () => {
           <p className="text-gray-500">Nenhuma lista personalizada criada.</p>
         ) : (
           <ul className="space-y-4">
-            {customLists.map((list) => (
-              <li
-                key={list.id}
-                className="p-4 border rounded shadow-sm bg-white"
-              >
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-bold">{list.name}</h3>
-                  <div className="flex items-center space-x-2">
-                    {/* Botão de expandir/recolher */}
-                    <button
-                      onClick={() => toggleExpandList(list.id)}
-                      className="text-white hover:text-gray-700"
-                    >
-                      {expandedLists.includes(list.id) ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 15l7-7 7 7"
-                          />
-                        </svg>
+            {customLists.map((list) => {
+              const totalVerses = editableTotals[list.id] ?? list.verses.length;
+
+              return (
+                <li key={list.id} className="p-4 border rounded shadow-sm bg-white">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      {editingListId === list.id ? (
+                        <input
+                          type="text"
+                          value={list.name}
+                          onChange={(e) =>
+                            setCustomLists((prev) =>
+                              prev.map((l) =>
+                                l.id === list.id ? { ...l, name: e.target.value } : l
+                              )
+                            )
+                          }
+                          onBlur={() => handleEditListName(list.id, list.name)} // Salva ao perder o foco
+                          className="border p-1 text-sm"
+                          autoFocus
+                        />
                       ) : (
+                        <h3
+                          className="text-lg font-bold cursor-pointer"
+                          onClick={() => setEditingListId(list.id)} // Habilita o modo de edição
+                        >
+                          {list.name}
+                        </h3>
+                      )}
+                      {!expandedLists.includes(list.id) && (
+                        <input
+                          type="number"
+                          value={totalVerses}
+                          onChange={(e) => handleTotalChange(list.id, parseInt(e.target.value, 10) || 0)}
+                          className="border p-1 w-16 text-center text-sm"
+                        />
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {/* Botão de expandir/recolher */}
+                      <button
+                        onClick={() => toggleExpandList(list.id)}
+                        className="text-white hover:text-gray-700"
+                      >
+                        {expandedLists.includes(list.id) ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 15l7-7 7 7"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        )}
+                      </button>
+
+                      {/* Botão de excluir lista */}
+                      <button
+                        onClick={() => handleDeleteList(list.id)}
+                        className="text-white hover:text-red-700"
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-6 w-6"
@@ -249,159 +313,138 @@ const CustomLists: React.FC = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
+                            d="M6 18L18 6M6 6l12 12"
                           />
                         </svg>
-                      )}
-                    </button>
-
-                    {/* Botão de excluir lista */}
-                    <button
-                      onClick={() => handleDeleteList(list.id)}
-                      className="text-white hover:text-gray-300"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {expandedLists.includes(list.id) && (
-                  <>
-                    {/* Botões para adicionar versículos */}
-                    <div className="flex space-x-4 mb-4">
-                      <button
-                        onClick={() =>
-                          setManualInputsVisible(
-                            manualInputsVisible === list.id ? null : list.id
-                          )
-                        }
-                        className="bg-indigo-500 text-white p-2 rounded hover:bg-indigo-600"
-                      >
-                        Inserir +
-                      </button>
-                      <button
-                        onClick={() =>
-                          setImportInputsVisible(
-                            importInputsVisible === list.id ? null : list.id
-                          )
-                        }
-                        className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex"
-                      >
-                        <img
-                          src="https://www.bible.com/assets/icons/bible/200/en.png"
-                          alt="Bible App"
-                          className="w-6 h-6"
-                        />
-                        <span>Importar</span>
                       </button>
                     </div>
+                  </div>
 
-                    {/* Inputs para adicionar versículo manualmente */}
-                    {manualInputsVisible === list.id && (
-                      <div className="mb-4">
-                        <input
-                          type="text"
-                          placeholder="Texto do Versículo"
-                          value={newVerse.text}
-                          onChange={(e) =>
-                            setNewVerse((prev) => ({
-                              ...prev,
-                              text: e.target.value,
-                            }))
-                          }
-                          className="border p-2 w-full mb-2"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Referência (Ex.: João 3:16)"
-                          value={newVerse.reference}
-                          onChange={(e) =>
-                            setNewVerse((prev) => ({
-                              ...prev,
-                              reference: e.target.value,
-                            }))
-                          }
-                          className="border p-2 w-full mb-2"
-                        />
-                        <select
-                          value={newVerse.version}
-                          onChange={(e) =>
-                            setNewVerse((prev) => ({
-                              ...prev,
-                              version: e.target.value,
-                            }))
-                          }
-                          className="border p-2 w-full mb-2"
-                        >
-                          <option value="NTLH">NTLH</option>
-                          <option value="ARA">ARA</option>
-                          <option value="NVI">NVI</option>
-                          <option value="NVT">NVT</option>
-                          <option value="ARC">ARC</option>
-                        </select>
-                        <button
-                          onClick={() => handleAddVerseToList(list.id)}
-                          className="bg-green-500 text-white p-2 rounded"
-                        >
-                          Salvar Versículo
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Inputs para importar versículo */}
-                    {importInputsVisible === list.id && (
-                      <div className="mb-4">
-                        <textarea
-                          placeholder="Cole aqui o versículo copiado do App da Bible"
-                          value={importedVerse}
-                          onChange={(e) => setImportedVerse(e.target.value)}
-                          className="border p-2 w-full h-24 mb-2"
-                        />
+                  {expandedLists.includes(list.id) && (
+                    <>
+                      {/* Botões para adicionar versículos */}
+                      <div className="flex space-x-4 mb-4">
                         <button
                           onClick={() =>
-                            handleImportVerseToList(list.id, list.name)
+                            setManualInputsVisible(
+                              manualInputsVisible === list.id ? null : list.id
+                            )
                           }
-                          className="bg-blue-500 text-white p-2 rounded"
+                          className="bg-indigo-500 text-white p-2 rounded hover:bg-indigo-600"
                         >
-                          Importar Versículo
+                          Inserir +
+                        </button>
+                        <button
+                          onClick={() =>
+                            setImportInputsVisible(
+                              importInputsVisible === list.id ? null : list.id
+                            )
+                          }
+                          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex"
+                        >
+                          <img
+                            src="https://www.bible.com/assets/icons/bible/200/en.png"
+                            alt="Bible App"
+                            className="w-6 h-6"
+                          />
+                          <span>Importar</span>
                         </button>
                       </div>
-                    )}
 
-                    <VerseList
-                      verses={list.verses}
-                      setVerses={(updatedVerses) => {
-                        const updatedLists = customLists.map((l) =>
-                          l.id === list.id
-                            ? {
-                                ...l,
-                                verses: Array.isArray(updatedVerses)
-                                  ? updatedVerses
-                                  : updatedVerses([]), // Garante que updatedVerses seja um array
-                              }
-                            : l
-                        );
-                        saveCustomList(updatedLists);
-                        setCustomLists(updatedLists);
-                      }}
-                    />
-                  </>
-                )}
-              </li>
-            ))}
+                      {/* Inputs para adicionar versículo manualmente */}
+                      {manualInputsVisible === list.id && (
+                        <div className="mb-4">
+                          <input
+                            type="text"
+                            placeholder="Texto do Versículo"
+                            value={newVerse.text}
+                            onChange={(e) =>
+                              setNewVerse((prev) => ({
+                                ...prev,
+                                text: e.target.value,
+                              }))
+                            }
+                            className="border p-2 w-full mb-2"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Referência (Ex.: João 3:16)"
+                            value={newVerse.reference}
+                            onChange={(e) =>
+                              setNewVerse((prev) => ({
+                                ...prev,
+                                reference: e.target.value,
+                              }))
+                            }
+                            className="border p-2 w-full mb-2"
+                          />
+                          <select
+                            value={newVerse.version}
+                            onChange={(e) =>
+                              setNewVerse((prev) => ({
+                                ...prev,
+                                version: e.target.value,
+                              }))
+                            }
+                            className="border p-2 w-full mb-2"
+                          >
+                            <option value="NTLH">NTLH</option>
+                            <option value="ARA">ARA</option>
+                            <option value="NVI">NVI</option>
+                            <option value="NVT">NVT</option>
+                            <option value="ARC">ARC</option>
+                          </select>
+                          <button
+                            onClick={() => handleAddVerseToList(list.id)}
+                            className="bg-green-500 text-white p-2 rounded"
+                          >
+                            Salvar Versículo
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Inputs para importar versículo */}
+                      {importInputsVisible === list.id && (
+                        <div className="mb-4">
+                          <textarea
+                            placeholder="Cole aqui o versículo copiado do App da Bible"
+                            value={importedVerse}
+                            onChange={(e) => setImportedVerse(e.target.value)}
+                            className="border p-2 w-full h-24 mb-2"
+                          />
+                          <button
+                            onClick={() =>
+                              handleImportVerseToList(list.id, list.name)
+                            }
+                            className="bg-blue-500 text-white p-2 rounded"
+                          >
+                            Importar Versículo
+                          </button>
+                        </div>
+                      )}
+
+                      <VerseList
+                        verses={list.verses}
+                        setVerses={(updatedVerses) => {
+                          const updatedLists = customLists.map((l) =>
+                            l.id === list.id
+                              ? {
+                                  ...l,
+                                  verses: Array.isArray(updatedVerses)
+                                    ? updatedVerses
+                                    : updatedVerses([]), // Garante que updatedVerses seja um array
+                                }
+                              : l
+                          );
+                          saveCustomList(updatedLists);
+                          setCustomLists(updatedLists);
+                        }}
+                      />
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
