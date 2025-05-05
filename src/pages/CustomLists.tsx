@@ -1,17 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import VerseList from "../components/VerseList";
 import { saveCustomList, getCustomLists } from "../utils/localStorageHelper";
 import { CustomList, Verse } from "../types";
 
 const CustomLists: React.FC = () => {
-  const [customLists, setCustomLists] = useState<CustomList[]>(getCustomLists());
+  const [customLists, setCustomLists] = useState<CustomList[]>([]);
   const [expandedLists, setExpandedLists] = useState<string[]>([]);
-  const [editableTotals, setEditableTotals] = useState<{ [key: string]: number }>({});
+  const [editableTotals, setEditableTotals] = useState<{
+    [key: string]: number;
+  }>({});
   const [editingListId, setEditingListId] = useState<string | null>(null); // Estado para rastrear a lista em edição
   const [newListName, setNewListName] = useState("");
   const [isCreatingNewList, setIsCreatingNewList] = useState(false);
-  const [manualInputsVisible, setManualInputsVisible] = useState<string | null>(null);
-  const [importInputsVisible, setImportInputsVisible] = useState<string | null>(null);
+  const [manualInputsVisible, setManualInputsVisible] = useState<string | null>(
+    null
+  );
+  const [importInputsVisible, setImportInputsVisible] = useState<string | null>(
+    null
+  );
   const [newVerse, setNewVerse] = useState({
     text: "",
     reference: "",
@@ -19,9 +25,22 @@ const CustomLists: React.FC = () => {
   });
   const [importedVerse, setImportedVerse] = useState("");
 
+  // Carrega as listas do localStorage e ordena alfabeticamente ao inicializar
+  useEffect(() => {
+    const lists = getCustomLists();
+    setCustomLists(sortListsAlphabetically(lists));
+  }, []);
+
+  // Função para ordenar as listas por nome em ordem alfabética
+  const sortListsAlphabetically = (lists: CustomList[]): CustomList[] => {
+    return [...lists].sort((a, b) => a.name.localeCompare(b.name));
+  };
+
   const toggleExpandList = (listId: string) => {
     setExpandedLists((prev) =>
-      prev.includes(listId) ? prev.filter((id) => id !== listId) : [...prev, listId]
+      prev.includes(listId)
+        ? prev.filter((id) => id !== listId)
+        : [...prev, listId]
     );
   };
 
@@ -43,7 +62,7 @@ const CustomLists: React.FC = () => {
       color: "#FFFFFF", // Define uma cor padrão ou permita que o usuário escolha
     };
 
-    const updatedLists = [newList, ...customLists];
+    const updatedLists = sortListsAlphabetically([...customLists, newList]);
     saveCustomList(updatedLists); // Salva no localStorage
     setCustomLists(updatedLists); // Atualiza o estado
     setNewListName("");
@@ -151,8 +170,10 @@ const CustomLists: React.FC = () => {
   };
 
   const handleEditListName = (listId: string, newName: string) => {
-    const updatedLists = customLists.map((list) =>
-      list.id === listId ? { ...list, name: newName } : list
+    const updatedLists = sortListsAlphabetically(
+      customLists.map((list) =>
+        list.id === listId ? { ...list, name: newName } : list
+      )
     );
     saveCustomList(updatedLists);
     setCustomLists(updatedLists);
@@ -223,7 +244,10 @@ const CustomLists: React.FC = () => {
               const totalVerses = editableTotals[list.id] ?? list.verses.length;
 
               return (
-                <li key={list.id} className="p-4 border rounded shadow-sm bg-white">
+                <li
+                  key={list.id}
+                  className="p-4 border rounded shadow-sm bg-white"
+                >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
                       {editingListId === list.id ? (
@@ -233,7 +257,9 @@ const CustomLists: React.FC = () => {
                           onChange={(e) =>
                             setCustomLists((prev) =>
                               prev.map((l) =>
-                                l.id === list.id ? { ...l, name: e.target.value } : l
+                                l.id === list.id
+                                  ? { ...l, name: e.target.value }
+                                  : l
                               )
                             )
                           }
@@ -253,7 +279,12 @@ const CustomLists: React.FC = () => {
                         <input
                           type="number"
                           value={totalVerses}
-                          onChange={(e) => handleTotalChange(list.id, parseInt(e.target.value, 10) || 0)}
+                          onChange={(e) =>
+                            handleTotalChange(
+                              list.id,
+                              parseInt(e.target.value, 10) || 0
+                            )
+                          }
                           className="border p-1 w-16 text-center text-sm"
                         />
                       )}
