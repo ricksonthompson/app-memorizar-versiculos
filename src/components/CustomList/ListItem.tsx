@@ -6,21 +6,17 @@ import { getStoredVerses } from "../../utils/localStorageHelper";
 
 interface ListItemProps {
   list: CustomList;
-  expandedLists: Record<string, boolean>;
+  expandedLists: string[];
   editableTotals: Record<string, string>;
   editingListId: string | null;
-  manualInputsVisible: Record<string, boolean>;
-  importInputsVisible: Record<string, boolean>;
+  manualInputsVisible: string | null;
+  importInputsVisible: string | null;
   newVerse: { text: string; reference: string; version: string };
   importedVerse: string;
   setEditingListId: (id: string | null) => void;
   setCustomLists: React.Dispatch<React.SetStateAction<CustomList[]>>;
-  setManualInputsVisible: React.Dispatch<
-    React.SetStateAction<Record<string, boolean>>
-  >;
-  setImportInputsVisible: React.Dispatch<
-    React.SetStateAction<Record<string, boolean>>
-  >;
+  setManualInputsVisible: React.Dispatch<React.SetStateAction<string | null>>;
+  setImportInputsVisible: React.Dispatch<React.SetStateAction<string | null>>;
   setNewVerse: React.Dispatch<
     React.SetStateAction<{ text: string; reference: string; version: string }>
   >;
@@ -30,7 +26,7 @@ interface ListItemProps {
   handleDeleteList: (listId: string) => void;
   toggleExpandList: (listId: string) => void;
   handleAddVerseToList: (listId: string) => void;
-  handleImportVerseToList: (listId: string) => void;
+  handleImportVerseToList: (listId: string, listName: string) => void;
 }
 
 const ListItem: React.FC<ListItemProps> = ({
@@ -55,22 +51,7 @@ const ListItem: React.FC<ListItemProps> = ({
   handleAddVerseToList,
   handleImportVerseToList,
 }) => {
-  const isExpanded = expandedLists[list.id] || false;
   const allVerses = getStoredVerses();
-
-  const toggleManualInputs = () => {
-    setManualInputsVisible((prev) => ({
-      ...prev,
-      [list.id]: !prev[list.id],
-    }));
-  };
-
-  const toggleImportInputs = () => {
-    setImportInputsVisible((prev) => ({
-      ...prev,
-      [list.id]: !prev[list.id],
-    }));
-  };
 
   const handleVerseListChange = (
     newVerses: Verse[] | ((prevState: Verse[]) => Verse[])
@@ -98,7 +79,7 @@ const ListItem: React.FC<ListItemProps> = ({
       >
         <ListHeader
           list={list}
-          isExpanded={isExpanded}
+          isExpanded={expandedLists.includes(list.id)}
           editingListId={editingListId}
           toggleExpandList={toggleExpandList}
           setEditingListId={setEditingListId}
@@ -107,117 +88,104 @@ const ListItem: React.FC<ListItemProps> = ({
         />
       </div>
 
-      {isExpanded && (
-        <div className="p-4">
-          {/* Opções para adicionar versículos à lista */}
-          <div className="mb-4 flex flex-wrap gap-2">
+      {expandedLists.includes(list.id) && (
+        <>
+          {/* Botões para adicionar versículos */}
+          <div className="flex space-x-4 mb-4">
             <button
-              onClick={toggleManualInputs}
-              className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+              onClick={() =>
+                setManualInputsVisible(
+                  manualInputsVisible === list.id ? null : list.id
+                )
+              }
+              className="bg-indigo-500 text-white p-2 rounded hover:bg-indigo-600"
             >
-              {manualInputsVisible[list.id]
-                ? "Cancelar"
-                : "Adicionar Novo Versículo"}
+              Inserir +
             </button>
-
             <button
-              onClick={toggleImportInputs}
-              className="bg-purple-500 text-white p-2 rounded hover:bg-purple-600"
+              onClick={() =>
+                setImportInputsVisible(
+                  importInputsVisible === list.id ? null : list.id
+                )
+              }
+              className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex"
             >
-              {importInputsVisible[list.id] ? "Cancelar" : "Importar Versículo"}
+              <img
+                src="https://www.bible.com/assets/icons/bible/200/en.png"
+                alt="Bible App"
+                className="w-6 h-6"
+              />
+              <span>Importar</span>
             </button>
           </div>
 
-          {/* Formulário para adicionar manualmente novos versículos */}
-          {manualInputsVisible[list.id] && (
-            <div className="mb-4 p-4 bg-gray-50 border rounded">
-              <h4 className="text-md font-medium mb-2">
-                Adicionar Novo Versículo
-              </h4>
-              <div className="space-y-2">
-                <div>
-                  <label className="block text-sm mb-1">Texto</label>
-                  <textarea
-                    value={newVerse.text}
-                    onChange={(e) =>
-                      setNewVerse((prev) => ({ ...prev, text: e.target.value }))
-                    }
-                    className="w-full p-2 border rounded"
-                    rows={3}
-                  />
-                </div>
-                <div className="flex space-x-2">
-                  <div className="flex-1">
-                    <label className="block text-sm mb-1">Referência</label>
-                    <input
-                      type="text"
-                      value={newVerse.reference}
-                      onChange={(e) =>
-                        setNewVerse((prev) => ({
-                          ...prev,
-                          reference: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 border rounded"
-                      placeholder="Ex: João 3:16"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-sm mb-1">Versão</label>
-                    <input
-                      type="text"
-                      value={newVerse.version}
-                      onChange={(e) =>
-                        setNewVerse((prev) => ({
-                          ...prev,
-                          version: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 border rounded"
-                      placeholder="Ex: NVI"
-                    />
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleAddVerseToList(list.id)}
-                  className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
-                >
-                  Adicionar
-                </button>
-              </div>
+          {/* Inputs para adicionar versículo manualmente */}
+          {manualInputsVisible === list.id && (
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Texto do Versículo"
+                value={newVerse.text}
+                onChange={(e) =>
+                  setNewVerse((prev) => ({
+                    ...prev,
+                    text: e.target.value,
+                  }))
+                }
+                className="border p-2 w-full mb-2"
+              />
+              <input
+                type="text"
+                placeholder="Referência (Ex.: João 3:16)"
+                value={newVerse.reference}
+                onChange={(e) =>
+                  setNewVerse((prev) => ({
+                    ...prev,
+                    reference: e.target.value,
+                  }))
+                }
+                className="border p-2 w-full mb-2"
+              />
+              <select
+                value={newVerse.version}
+                onChange={(e) =>
+                  setNewVerse((prev) => ({
+                    ...prev,
+                    version: e.target.value,
+                  }))
+                }
+                className="border p-2 w-full mb-2"
+              >
+                <option value="NTLH">NTLH</option>
+                <option value="ARA">ARA</option>
+                <option value="NVI">NVI</option>
+                <option value="NVT">NVT</option>
+                <option value="ARC">ARC</option>
+              </select>
+              <button
+                onClick={() => handleAddVerseToList(list.id)}
+                className="bg-green-500 text-white p-2 rounded"
+              >
+                Salvar Versículo
+              </button>
             </div>
           )}
 
-          {/* Formulário para importar versículos existentes */}
-          {importInputsVisible[list.id] && (
-            <div className="mb-4 p-4 bg-gray-50 border rounded">
-              <h4 className="text-md font-medium mb-2">
-                Importar Versículo Existente
-              </h4>
-              <div className="space-y-2">
-                <label className="block text-sm mb-1">
-                  Selecione um versículo
-                </label>
-                <select
-                  value={importedVerse}
-                  onChange={(e) => setImportedVerse(e.target.value)}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="">-- Selecione um versículo --</option>
-                  {allVerses.map((verse) => (
-                    <option key={verse.id} value={verse.id}>
-                      {verse.reference} ({verse.version})
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => handleImportVerseToList(list.id)}
-                  className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
-                  disabled={!importedVerse}
-                >
-                  Importar
-                </button>
-              </div>
+          {/* Inputs para importar versículo */}
+          {importInputsVisible === list.id && (
+            <div className="mb-4">
+              <textarea
+                placeholder="Cole aqui o versículo copiado do App da Bible"
+                value={importedVerse}
+                onChange={(e) => setImportedVerse(e.target.value)}
+                className="border p-2 w-full h-24 mb-2"
+              />
+              <button
+                onClick={() => handleImportVerseToList(list.id, list.name)}
+                className="bg-blue-500 text-white p-2 rounded"
+              >
+                Importar Versículo
+              </button>
             </div>
           )}
 
@@ -235,7 +203,7 @@ const ListItem: React.FC<ListItemProps> = ({
               Esta lista ainda não possui versículos.
             </p>
           )}
-        </div>
+        </>
       )}
     </li>
   );

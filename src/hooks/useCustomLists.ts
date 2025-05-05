@@ -10,9 +10,7 @@ import {
 export function useCustomLists() {
   // Estados
   const [customLists, setCustomLists] = useState<CustomList[]>([]);
-  const [expandedLists, setExpandedLists] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [expandedLists, setExpandedLists] = useState<string[]>([]); // Mudou para array de strings
   const [editableTotals, setEditableTotals] = useState<Record<string, string>>(
     {}
   );
@@ -21,12 +19,12 @@ export function useCustomLists() {
   const [isCreatingNewList, setIsCreatingNewList] = useState(false);
 
   // Estados para adição de versículos
-  const [manualInputsVisible, setManualInputsVisible] = useState<
-    Record<string, boolean>
-  >({});
-  const [importInputsVisible, setImportInputsVisible] = useState<
-    Record<string, boolean>
-  >({});
+  const [manualInputsVisible, setManualInputsVisible] = useState<string | null>(
+    null
+  ); // Mudou para string | null
+  const [importInputsVisible, setImportInputsVisible] = useState<string | null>(
+    null
+  ); // Mudou para string | null
   const [newVerse, setNewVerse] = useState<{
     text: string;
     reference: string;
@@ -43,16 +41,12 @@ export function useCustomLists() {
     const fetchedLists = getCustomLists();
     setCustomLists(fetchedLists);
 
-    // Inicializar estados para cada lista
-    const initialExpandedState: Record<string, boolean> = {};
+    // Inicializar totais editáveis
     const initialTotals: Record<string, string> = {};
-
     fetchedLists.forEach((list) => {
-      initialExpandedState[list.id] = false;
       initialTotals[list.id] = list.verses.length.toString();
     });
 
-    setExpandedLists(initialExpandedState);
     setEditableTotals(initialTotals);
   }, []);
 
@@ -76,11 +70,7 @@ export function useCustomLists() {
     setNewListName("");
     setIsCreatingNewList(false);
 
-    // Inicializar estados para a nova lista
-    setExpandedLists((prev) => ({
-      ...prev,
-      [newList.id]: false,
-    }));
+    // Inicializar totais para a nova lista
     setEditableTotals((prev) => ({
       ...prev,
       [newList.id]: "0",
@@ -103,13 +93,41 @@ export function useCustomLists() {
     const updatedLists = customLists.filter((list) => list.id !== listId);
     setCustomLists(updatedLists);
     saveCustomList(updatedLists);
+
+    // Remover da lista de expandidos se estiver lá
+    if (expandedLists.includes(listId)) {
+      setExpandedLists(expandedLists.filter((id) => id !== listId));
+    }
+
+    // Resetar inputs se estiverem visíveis
+    if (manualInputsVisible === listId) {
+      setManualInputsVisible(null);
+    }
+
+    if (importInputsVisible === listId) {
+      setImportInputsVisible(null);
+    }
   };
 
   const toggleExpandList = (listId: string) => {
-    setExpandedLists((prev) => ({
-      ...prev,
-      [listId]: !prev[listId],
-    }));
+    setExpandedLists((prev) => {
+      if (prev.includes(listId)) {
+        return prev.filter((id) => id !== listId);
+      } else {
+        return [...prev, listId];
+      }
+    });
+
+    // Fechar inputs quando fechar a lista
+    if (expandedLists.includes(listId)) {
+      if (manualInputsVisible === listId) {
+        setManualInputsVisible(null);
+      }
+
+      if (importInputsVisible === listId) {
+        setImportInputsVisible(null);
+      }
+    }
   };
 
   // Funções para gerenciamento de versículos
@@ -161,47 +179,123 @@ export function useCustomLists() {
       reference: "",
       version: "",
     });
+
+    // Fechar o painel de inserção manual
+    setManualInputsVisible(null);
   };
 
-  const handleImportVerseToList = (listId: string) => {
-    if (!importedVerse) return;
-
-    // Encontrar o versículo pelo ID
-    const allVerses = getStoredVerses();
-    const verse = allVerses.find((v) => v.id === importedVerse);
-
-    if (!verse) return;
-
-    // Adicionar à lista
-    const updatedLists = customLists.map((list) => {
-      if (list.id === listId) {
-        // Verificar se o versículo já existe na lista
-        const verseExists = list.verses.some((v) => v.id === verse.id);
-
-        if (verseExists) return list;
-
-        return {
-          ...list,
-          verses: [...list.verses, verse],
-        };
+  const handleImportVerseToList = (listId: string, listName: string) => {
+    // Verificar primeiro se é texto colado (não um ID)
+    if (importedVerse && !/^[0-9]+$/.test(importedVerse)) {
+      // É um texto colado - processar o versículo
+      if (importedVerse.trim() === "") {
+        alert("Por favor, cole um versículo válido.");
+        return;
       }
-      return list;
-    });
 
-    setCustomLists(updatedLists);
-    saveCustomList(updatedLists);
+      const lines = importedVerse.split("\n").map((line) => line.trim());
 
-    // Atualizar o total editável
-    setEditableTotals((prev) => {
-      const list = updatedLists.find((l) => l.id === listId);
-      return {
-        ...prev,
-        [listId]: list ? list.verses.length.toString() : prev[listId],
-      };
-    });
+      let text = "";
+      let reference = "";
 
-    // Resetar o formulário
-    setImportedVerse("");
+      // Itera pelas linhas para encontrar o texto e a referência
+      for (const line of lines) {
+        // Remove caracteres desnecessários (como aspas e símbolos invisíveis), mas preserva acentos e caracteres Unicode
+        const sanitizedLine = line.replace(
+          /[\u200E\u200F\u202A-\u202E"""']/g,
+          ""
+        );
+
+        // Detecta a linha com a referência (números:números)
+        if (/\d+:\d+/.test(sanitizedLine)) {
+          reference = sanitizedLine; // Define a referência
+          break; // Para o loop ao encontrar a referência
+        }
+
+        // Se ainda não encontrou a referência, acumula no texto
+        text += (text ? " " : "") + sanitizedLine;
+      }
+
+      if (text && reference) {
+        const parts = reference.split(" ");
+        const book = parts[0];
+        const chapterAndVerse = parts[1];
+        const version = parts[2] || "NTLH";
+
+        const verse: Verse = {
+          id: Date.now().toString(),
+          text,
+          reference: `${book} ${chapterAndVerse} ${version}`.trim(), // Garante que a versão não seja duplicada
+          version,
+          month: new Date().getMonth() + 1,
+          year: new Date().getFullYear(),
+          week: listName, // Usar o nome da lista como identificação da semana
+        };
+
+        // Remove a versão duplicada na referência, se necessário
+        if (verse.reference.split(" ").includes(verse.version)) {
+          verse.reference = verse.reference.split(verse.version)[0].trim();
+        }
+
+        // Atualiza a lista correspondente
+        const updatedLists = customLists.map((list) => {
+          if (list.id === listId) {
+            return { ...list, verses: [...list.verses, verse] };
+          }
+          return list;
+        });
+
+        saveCustomList(updatedLists); // Salva no localStorage
+        setCustomLists(updatedLists); // Atualiza o estado
+        setImportedVerse(""); // Limpa o campo de importação
+        setImportInputsVisible(null); // Oculta os inputs
+      } else {
+        alert(
+          "Não foi possível identificar o texto ou a referência do versículo."
+        );
+      }
+    } else {
+      // É um ID selecionado do dropdown - processo original
+      if (!importedVerse) return;
+
+      // Encontrar o versículo pelo ID
+      const allVerses = getStoredVerses();
+      const verse = allVerses.find((v) => v.id === importedVerse);
+
+      if (!verse) return;
+
+      // Adicionar à lista
+      const updatedLists = customLists.map((list) => {
+        if (list.id === listId) {
+          // Verificar se o versículo já existe na lista
+          const verseExists = list.verses.some((v) => v.id === verse.id);
+
+          if (verseExists) return list;
+
+          return {
+            ...list,
+            verses: [...list.verses, verse],
+          };
+        }
+        return list;
+      });
+
+      setCustomLists(updatedLists);
+      saveCustomList(updatedLists);
+
+      // Atualizar o total editável
+      setEditableTotals((prev) => {
+        const list = updatedLists.find((l) => l.id === listId);
+        return {
+          ...prev,
+          [listId]: list ? list.verses.length.toString() : prev[listId],
+        };
+      });
+
+      // Resetar o formulário
+      setImportedVerse("");
+      setImportInputsVisible(null);
+    }
   };
 
   const handleTotalChange = (listId: string, value: string) => {

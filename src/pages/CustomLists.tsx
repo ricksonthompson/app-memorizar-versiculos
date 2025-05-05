@@ -165,45 +165,73 @@ const useCustomLists = () => {
     });
   };
 
-  const handleImportVerseToList = (listId: string) => {
-    if (!importedVerse) return;
+  const handleImportVerseToList = (listId: string, listName: string) => {
+    if (!importedVerse || importedVerse.trim() === "") {
+      alert("Por favor, cole um versículo válido.");
+      return;
+    }
 
-    // Encontrar o versículo pelo ID
-    const allVerses = getStoredVerses();
-    const verse = allVerses.find((v) => v.id === importedVerse);
+    const lines = importedVerse.split("\n").map((line) => line.trim());
 
-    if (!verse) return;
+    let text = "";
+    let reference = "";
 
-    // Adicionar à lista
-    const updatedLists = customLists.map((list) => {
-      if (list.id === listId) {
-        // Verificar se o versículo já existe na lista
-        const verseExists = list.verses.some((v) => v.id === verse.id);
+    // Itera pelas linhas para encontrar o texto e a referência
+    for (const line of lines) {
+      // Remove caracteres desnecessários (como aspas e símbolos invisíveis), mas preserva acentos e caracteres Unicode
+      const sanitizedLine = line.replace(
+        /[\u200E\u200F\u202A-\u202E"""']/g,
+        ""
+      );
 
-        if (verseExists) return list;
-
-        return {
-          ...list,
-          verses: [...list.verses, verse],
-        };
+      // Detecta a linha com a referência (números:números)
+      if (/\d+:\d+/.test(sanitizedLine)) {
+        reference = sanitizedLine; // Define a referência
+        break; // Para o loop ao encontrar a referência
       }
-      return list;
-    });
 
-    setCustomLists(updatedLists);
-    saveCustomList(updatedLists);
+      // Se ainda não encontrou a referência, acumula no texto
+      text += (text ? " " : "") + sanitizedLine;
+    }
 
-    // Atualizar o total editável
-    setEditableTotals((prev) => {
-      const list = updatedLists.find((l) => l.id === listId);
-      return {
-        ...prev,
-        [listId]: list ? list.verses.length.toString() : prev[listId],
+    if (text && reference) {
+      const parts = reference.split(" ");
+      const book = parts[0];
+      const chapterAndVerse = parts[1];
+      const version = parts[2] || "NTLH";
+
+      const verse: Verse = {
+        id: Date.now().toString(),
+        text,
+        reference: `${book} ${chapterAndVerse} ${version}`.trim(), // Garante que a versão não seja duplicada
+        version,
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+        week: listName, // Valor default
       };
-    });
 
-    // Resetar o formulário
-    setImportedVerse("");
+      // Remove a versão duplicada na referência, se necessário
+      if (verse.reference.split(" ").includes(verse.version)) {
+        verse.reference = verse.reference.split(verse.version)[0].trim();
+      }
+
+      // Atualiza a lista correspondente
+      const updatedLists = customLists.map((list) => {
+        if (list.id === listId) {
+          return { ...list, verses: [...list.verses, verse] };
+        }
+        return list;
+      });
+
+      saveCustomList(updatedLists); // Salva no localStorage
+      setCustomLists(updatedLists); // Atualiza o estado
+      setImportedVerse(""); // Limpa o campo de importação
+      setImportInputsVisible({}); // Oculta os inputs
+    } else {
+      alert(
+        "Não foi possível identificar o texto ou a referência do versículo."
+      );
+    }
   };
 
   const handleTotalChange = (listId: string, value: string) => {
@@ -438,7 +466,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
           onClick={() => handleDeleteList(list.id)}
           className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
         >
-          Excluir
+          X
         </button>
       </div>
     </div>
@@ -472,7 +500,7 @@ interface ListItemProps {
   handleDeleteList: (listId: string) => void;
   toggleExpandList: (listId: string) => void;
   handleAddVerseToList: (listId: string) => void;
-  handleImportVerseToList: (listId: string) => void;
+  handleImportVerseToList: (listId: string, listName: string) => void;
 }
 
 const ListItem: React.FC<ListItemProps> = ({
@@ -634,28 +662,27 @@ const ListItem: React.FC<ListItemProps> = ({
           {importInputsVisible[list.id] && (
             <div className="mb-4 p-4 bg-gray-50 border rounded">
               <h4 className="text-md font-medium mb-2">
-                Importar Versículo Existente
+                Importar Versículo do App da Bíblia
               </h4>
               <div className="space-y-2">
                 <label className="block text-sm mb-1">
-                  Selecione um versículo
+                  Cole o texto do versículo abaixo
                 </label>
-                <select
+                <textarea
                   value={importedVerse}
                   onChange={(e) => setImportedVerse(e.target.value)}
                   className="w-full p-2 border rounded"
-                >
-                  <option value="">-- Selecione um versículo --</option>
-                  {allVerses.map((verse) => (
-                    <option key={verse.id} value={verse.id}>
-                      {verse.reference} ({verse.version})
-                    </option>
-                  ))}
-                </select>
+                  rows={5}
+                  placeholder="Cole aqui o texto do versículo copiado do aplicativo da Bíblia"
+                />
+                <p className="text-xs text-gray-500">
+                  Dica: Copie o versículo completo do app da Bíblia incluindo a
+                  referência.
+                </p>
                 <button
-                  onClick={() => handleImportVerseToList(list.id)}
+                  onClick={() => handleImportVerseToList(list.id, list.name)}
                   className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
-                  disabled={!importedVerse}
+                  disabled={!importedVerse.trim()}
                 >
                   Importar
                 </button>
