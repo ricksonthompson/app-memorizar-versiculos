@@ -1,24 +1,24 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const Header: React.FC = () => {
-    return (
-        <header className="bg-[#0A9B71] text-white p-4 w-full shadow-md">
-            <div className="flex items-center justify-between">
-                {/* Logo e Título */}
-                <div className="flex items-center space-x-4">
-                    <img
-                        src="https://www.freeiconspng.com/thumbs/bible-icon/bible-icon-6.png"
-                        alt="Logo"
-                        className="w-10 h-10"
-                    />
-                    <h1 className="text-2xl font-bold">App de Memorização</h1>
-                </div>
+  return (
+    <header className="bg-[#0A9B71] text-white p-4 w-full shadow-md">
+      <div className="flex items-center justify-between">
+        {/* Logo e Título */}
+        <div className="flex items-center space-x-4">
+          <img
+            src="https://www.freeiconspng.com/thumbs/bible-icon/bible-icon-6.png"
+            alt="Logo"
+            className="w-10 h-10"
+          />
+          <h1 className="text-2xl font-bold">Memorizei App</h1>
+        </div>
 
-                {/* Navegação */}
-                {/* <nav>
+        {/* Navegação */}
+        {/* <nav>
                     <ul className="flex space-x-4"> */}
-                        {/* <li>
+        {/* <li>
                             <Link
                                 to="/"
                                 className="bg-accent text-[#0A9B71] px-4 py-2 rounded hover:bg-[#0A9B71] hover:text-white transition"
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
                                 Home
                             </Link>
                         </li> */}
-                        {/* <li>
+        {/* <li>
                             <Link
                                 to="/meus-versiculos"
                                 className="bg-accent text-[#0A9B71] px-4 py-2 rounded hover:bg-[#0A9B71] hover:text-white transition"
@@ -34,7 +34,7 @@ const Header: React.FC = () => {
                                 Meus Versículos
                             </Link>
                         </li> */}
-                        {/* <li>
+        {/* <li>
                             <Link
                                 to="/listas-personalizadas"
                                 className="bg-accent text-[#0A9B71] px-4 py-2 rounded hover:bg-[#0A9B71] hover:text-white transition"
@@ -42,7 +42,7 @@ const Header: React.FC = () => {
                                 Listas Personalizadas
                             </Link>
                         </li> */}
-                        {/* <li>
+        {/* <li>
                             <Link
                                 to="/recitar-versiculos"
                                 className="bg-accent text-[#0A9B71] px-4 py-2 rounded hover:bg-[#0A9B71] hover:text-white transition"
@@ -50,11 +50,11 @@ const Header: React.FC = () => {
                                 Recitar Versículos
                             </Link>
                         </li> */}
-                    {/* </ul>
+        {/* </ul>
                 </nav> */}
-            </div>
-        </header>
-    );
+      </div>
+    </header>
+  );
 };
 
 export default Header;
