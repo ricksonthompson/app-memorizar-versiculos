@@ -415,7 +415,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
             <h3 className="font-semibold">{list.name}</h3>
             <button
               onClick={() => setEditingListId(list.id)}
-              className="text-xs bg-gray-200 rounded px-1 hover:bg-gray-300"
+              className="text-xs bg-gray-200 rounded px-2 py-1 mr-5 hover:bg-gray-300"
               title="Editar nome"
             >
               ✎
