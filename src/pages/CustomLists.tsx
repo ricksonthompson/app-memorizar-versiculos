@@ -765,31 +765,34 @@ const CustomLists: React.FC = () => {
           <p className="text-gray-500">Nenhuma lista personalizada criada.</p>
         ) : (
           <ul className="space-y-4">
-            {customLists.map((list) => (
-              <ListItem
-                key={list.id}
-                list={list}
-                expandedLists={expandedLists}
-                editableTotals={editableTotals}
-                editingListId={editingListId}
-                manualInputsVisible={manualInputsVisible}
-                importInputsVisible={importInputsVisible}
-                newVerse={newVerse}
-                importedVerse={importedVerse}
-                setEditingListId={setEditingListId}
-                setCustomLists={setCustomLists}
-                setManualInputsVisible={setManualInputsVisible}
-                setImportInputsVisible={setImportInputsVisible}
-                setNewVerse={setNewVerse}
-                setImportedVerse={setImportedVerse}
-                handleTotalChange={handleTotalChange}
-                handleEditListName={handleEditListName}
-                handleDeleteList={handleDeleteList}
-                toggleExpandList={toggleExpandList}
-                handleAddVerseToList={handleAddVerseToList}
-                handleImportVerseToList={handleImportVerseToList}
-              />
-            ))}
+            {customLists
+              .slice()
+              .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+              .map((list) => (
+                <ListItem
+                  key={list.id}
+                  list={list}
+                  expandedLists={expandedLists}
+                  editableTotals={editableTotals}
+                  editingListId={editingListId}
+                  manualInputsVisible={manualInputsVisible}
+                  importInputsVisible={importInputsVisible}
+                  newVerse={newVerse}
+                  importedVerse={importedVerse}
+                  setEditingListId={setEditingListId}
+                  setCustomLists={setCustomLists}
+                  setManualInputsVisible={setManualInputsVisible}
+                  setImportInputsVisible={setImportInputsVisible}
+                  setNewVerse={setNewVerse}
+                  setImportedVerse={setImportedVerse}
+                  handleTotalChange={handleTotalChange}
+                  handleEditListName={handleEditListName}
+                  handleDeleteList={handleDeleteList}
+                  toggleExpandList={toggleExpandList}
+                  handleAddVerseToList={handleAddVerseToList}
+                  handleImportVerseToList={handleImportVerseToList}
+                />
+              ))}
           </ul>
         )}
       </div>
