@@ -50,7 +50,7 @@ const VerseList: React.FC<VerseListProps> = ({ verses, setVerses, disableDelete 
                     </div>
 
                     <div className="flex items-center space-x-4">
-                        {renderExtra && renderExtra(verse)}
+                        {/* {renderExtra && renderExtra(verse)} */}
 
                         <div className="flex flex-col space-y-1">
                             <button
