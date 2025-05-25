@@ -46,7 +46,7 @@ const VerseList: React.FC<VerseListProps> = ({ verses, setVerses, disableDelete 
                                 {verse.version}
                             </span>
                         </h2>
-                        <p className="text-gray-700">{verse.text}</p>
+                        <p className="text-gray-700" style={{ fontFamily: 'Avenir, sans-serif' }}>{verse.text}</p>
                     </div>
 
                     <div className="flex items-center space-x-4">
