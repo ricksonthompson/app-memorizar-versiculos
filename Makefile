@@ -1,0 +1,2 @@
+run-app:
+	npm start
