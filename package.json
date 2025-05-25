@@ -1,5 +1,5 @@
 {
-  "name": "verse-memorization-app",
+  "name": "memorizei-app",
   "version": "1.0.0",
   "description": "A React application for memorizing Bible verses with features for tracking and recitation.",
   "main": "index.js",
