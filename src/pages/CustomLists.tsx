@@ -706,6 +706,30 @@ const ListItem: React.FC<ListItemProps> = ({
   );
 };
 
+// Componente de pódio para mostrar o total de versos
+const TotalVersesPodium: React.FC<{ total: number }> = ({ total }) => (
+  <div className="flex justify-center mb-8">
+    <div className="bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-50 rounded-xl shadow-lg px-8 py-6 flex flex-col items-center border-2 border-yellow-300">
+      <div className="mb-2">
+        <svg
+          className="w-12 h-12 text-yellow-500 drop-shadow"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 2c.55 0 1 .45 1 1v2.09c3.39.49 6 3.39 6 6.91 0 2.93-2.07 5.38-4.92 5.91l.92 2.09h2c.55 0 1 .45 1 1s-.45 1-1 1h-2.5c-.41 0-.77-.25-.93-.62l-1.07-2.43c-.16-.37-.52-.62-.93-.62s-.77.25-.93.62l-1.07 2.43c-.16.37-.52.62-.93.62H6c-.55 0-1-.45-1-1s.45-1 1-1h2l.92-2.09C7.07 15.38 5 12.93 5 10c0-3.52 2.61-6.42 6-6.91V3c0-.55.45-1 1-1zm0 4C9.24 6 7 8.24 7 11c0 2.21 1.79 4 4 4s4-1.79 4-4c0-2.76-2.24-5-5-5zm0 2c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/>
+        </svg>
+      </div>
+      <div className="text-3xl font-extrabold text-yellow-700 flex items-center">
+        {total}
+        <span className="ml-2 text-lg font-semibold text-yellow-600">versos</span>
+      </div>
+      <div className="text-sm text-yellow-700 mt-1 font-medium">
+        Total de versos em todas as listas
+      </div>
+    </div>
+  </div>
+);
+
 // Componente principal CustomLists
 const CustomLists: React.FC = () => {
   const {
@@ -738,6 +762,12 @@ const CustomLists: React.FC = () => {
     toggleExpandList,
   } = useCustomLists();
 
+  // Soma total de versos de todas as listas
+  const totalVersesAllLists = customLists.reduce(
+    (sum, list) => sum + getTotalVerses(list),
+    0
+  );
+
   return (
     <div className="bg-background min-h-screen text-text px-4 py-6">
       <div className="container mx-auto">
@@ -745,6 +775,11 @@ const CustomLists: React.FC = () => {
           Listas Personalizadas
         </h2>
         <InfoPanel />
+
+        {/* Pódio de total de versos */}
+        {customLists.length > 0 && totalVersesAllLists > 0 && (
+          <TotalVersesPodium total={totalVersesAllLists} />
+        )}
 
         {/* Formulário para criar nova lista */}
         {!isCreatingNewList ? (
