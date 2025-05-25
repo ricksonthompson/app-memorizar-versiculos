@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 
 const Header: React.FC = () => {
   return (
-    <header className="bg-[#0A9B71] text-white p-4 w-full shadow-md">
-      <div className="flex items-center justify-between">
+    <header className="bg-secondary text-background p-4 w-full shadow-md">
+      <div className="container mx-auto flex items-center justify-between px-4">
         {/* Logo e Título */}
         <div className="flex items-center space-x-4">
           <img
@@ -12,7 +12,7 @@ const Header: React.FC = () => {
             alt="Logo"
             className="w-10 h-10"
           />
-          <h1 className="text-2xl font-bold">Memorizei App</h1>
+          <h1 className="text-2xl font-bold text-primary">Memorizei App</h1>
         </div>
 
         {/* Navegação */}

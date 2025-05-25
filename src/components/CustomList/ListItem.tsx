@@ -73,10 +73,7 @@ const ListItem: React.FC<ListItemProps> = ({
 
   return (
     <li className="border rounded shadow-sm overflow-hidden">
-      <div
-        className="bg-gray-100"
-        style={{ borderLeft: `4px solid ${list.color}` }}
-      >
+      <div className="border-l-4 border-secondary bg-background p-2">
         <ListHeader
           list={list}
           isExpanded={expandedLists.includes(list.id)}

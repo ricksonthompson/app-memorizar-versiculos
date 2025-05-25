@@ -49,7 +49,7 @@ const VerseForm = ({
           value={verseText}
           onChange={(e) => setVerseText(e.target.value)}
           required
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
+          className="mt-1 block w-full p-2 border border-primary-light focus:border-primary-dark rounded"
         />
       </div>
       <div className="mb-4">
@@ -61,7 +61,7 @@ const VerseForm = ({
           value={reference}
           onChange={(e) => setReference(e.target.value)}
           required
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
+          className="mt-1 block w-full p-2 border border-primary-light focus:border-primary-dark rounded"
         />
       </div>
       <div className="mb-4">
@@ -73,7 +73,7 @@ const VerseForm = ({
           value={version}
           onChange={(e) => setVersion(e.target.value)}
           required
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
+          className="mt-1 block w-full p-2 border border-primary-light focus:border-primary-dark rounded"
         />
       </div>
       <div className="mb-4">
@@ -83,7 +83,7 @@ const VerseForm = ({
           value={month}
           onChange={(e) => setMonth(e.target.value)}
           required
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
+          className="mt-1 block w-full p-2 border border-primary-light focus:border-primary-dark rounded"
         />
       </div>
       <div className="mb-4">
@@ -93,7 +93,7 @@ const VerseForm = ({
           value={year}
           onChange={(e) => setYear(e.target.value)}
           required
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
+          className="mt-1 block w-full p-2 border border-primary-light focus:border-primary-dark rounded"
         />
       </div>
       <div className="mb-4">
@@ -105,12 +105,12 @@ const VerseForm = ({
           value={week}
           onChange={(e) => setWeek(e.target.value)}
           required
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
+          className="mt-1 block w-full p-2 border border-primary-light focus:border-primary-dark rounded"
         />
       </div>
       <button
         type="submit"
-        className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
+        className="w-full bg-accent text-white p-2 rounded hover:bg-accent-dark"
       >
         Adicionar Versículo
       </button>
