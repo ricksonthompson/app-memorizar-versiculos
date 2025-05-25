@@ -33,6 +33,8 @@ function importLocalStorage(file: File, onFinish: (ok: boolean) => void) {
           }
         });
         onFinish(true);
+        // Recarrega a página após importar com sucesso
+        setTimeout(() => window.location.reload(), 500);
       } else {
         onFinish(false);
       }
