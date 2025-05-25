@@ -184,7 +184,7 @@ const ListItem: React.FC<ListItemProps> = ({
                 onClick={() => handleImportVerseToList(list.id, list.name)}
                 className="bg-blue-500 text-white p-2 rounded"
               >
-                Importar Versículo
+                Importar
               </button>
             </div>
           )}

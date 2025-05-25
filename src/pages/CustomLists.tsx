@@ -426,7 +426,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
 
       <div className="flex items-center space-x-2">
         <span className="text-sm bg-gray-200 px-2 py-1 rounded-full">
-          {list.verses.length} versículos
+          {list.verses.length}
         </span>
 
         <button
@@ -585,25 +585,21 @@ const ListItem: React.FC<ListItemProps> = ({
               onClick={toggleManualInputs}
               className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
             >
-              {manualInputsVisible[list.id]
-                ? "Cancelar"
-                : "Adicionar Novo Versículo"}
+              {manualInputsVisible[list.id] ? "Cancelar" : "Adicionar Verso"}
             </button>
 
             <button
               onClick={toggleImportInputs}
               className="bg-purple-500 text-white p-2 rounded hover:bg-purple-600"
             >
-              {importInputsVisible[list.id] ? "Cancelar" : "Importar Versículo"}
+              {importInputsVisible[list.id] ? "Cancelar" : "Importar"}
             </button>
           </div>
 
           {/* Formulário para adicionar manualmente novos versículos */}
           {manualInputsVisible[list.id] && (
             <div className="mb-4 p-4 bg-gray-50 border rounded">
-              <h4 className="text-md font-medium mb-2">
-                Adicionar Novo Versículo
-              </h4>
+              <h4 className="text-md font-medium mb-2">Adicionar Verso</h4>
               <div className="space-y-2">
                 <div>
                   <label className="block text-sm mb-1">Texto</label>

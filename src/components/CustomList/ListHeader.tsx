@@ -74,7 +74,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
 
       <div className="flex items-center space-x-2">
         <span className="text-sm bg-gray-200 px-2 py-1 rounded-full">
-          {list.verses.length} versículos
+          {list.verses.length}
         </span>
 
         <button
