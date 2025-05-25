@@ -426,7 +426,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
 
       <div className="flex items-center space-x-2">
         <span className="text-sm bg-gray-200 px-2 py-1 rounded-full">
-          {list.verses.length}
+          {getTotalVerses(list)}
         </span>
 
         <button
@@ -805,3 +805,32 @@ const CustomLists: React.FC = () => {
 };
 
 export default CustomLists;
+
+// Função utilitária para contar versos em uma referência
+function countVersesInReference(reference: string): number {
+  // Extrai apenas a parte dos versículos (após o ':')
+  // Exemplo: "Efésios 5:1-2,4,6-8" => "1-2,4,6-8"
+  const match = reference.match(/:(.*?)(?:\s|$)/);
+  if (!match) return 1;
+  const versesPart = match[1].trim();
+
+  let total = 0;
+  versesPart.split(',').forEach((part) => {
+    if (part.includes('-')) {
+      const [start, end] = part.split('-').map(Number);
+      if (!isNaN(start) && !isNaN(end) && end >= start) {
+        total += end - start + 1;
+      } else {
+        total += 1;
+      }
+    } else if (!isNaN(Number(part))) {
+      total += 1;
+    }
+  });
+  return total || 1;
+}
+
+// Função para contar o total de versos reais em uma lista
+function getTotalVerses(list: CustomList): number {
+  return list.verses.reduce((sum, verse) => sum + countVersesInReference(verse.reference), 0);
+}
